@@ -1,111 +1,85 @@
-🛡️ TrustGraph: Heterogeneous GNN for Marketplace Fraud Detection
+# Amazon Hackathon Season 5 – Trust Score Prediction using Heterogeneous Graph Neural Networks
 
-TrustGraph is an AI-powered fraud detection framework that leverages Heterogeneous Graph Neural Networks (HeteroGNNs) to detect fake reviews, suspicious sellers, and coordinated abuse across IP addresses in an e-commerce platform. It uses relational reasoning across multiple node types to output TrustScores for reviews, IPs, and sellers.
+This repository implements a Heterogeneous Graph Neural Network (MultiTrustGNN) that predicts trustworthiness scores for reviews, IP addresses, and sellers on an e-commerce platform. The model is trained using relational graph data and enriched features such as BERT embeddings, TF-IDF vectors, sentiment scores, and metadata.
 
-—
+---
 
-📌 Features
+## 📁 Repository Structure
 
-✅ Multimodal Node Features:
+Amazon-Hackathon-Season-5/
+├── Model.py # GNN model architecture definition
+├── testing_file.py # Inference script: adds new reviews and updates trust scores
+├── Training Dataset/ # CSV files: review_wl.csv, ip_wl.csv, seller_wl.csv, product_wl.csv
+├── multi_trust_gnn.pth # Pretrained model weights
+├── trust_scores_all_reviews.csv # Output: trust scores of all review nodes
+├── trust_scores_all_ips.csv # Output: trust scores of all IP nodes
+├── trust_scores_all_sellers.csv # Output: trust scores of all seller nodes
+└── README.md # Instructions and documentation
 
-Review Nodes: BERT embeddings, TF-IDF vectors, sentiment, rating, verified flag
-Product Nodes: Description, price bin, return rate, category
-Seller Nodes: Rating, flags, account age
-IP Nodes: VPN flag, usage pattern, review count
-✅ Graph Construction:
+yaml
+Copy
+Edit
 
-Heterogeneous graph with nodes: review, product, seller, IP
-Edge types:
-(review) —written_for→ (product)
-(product) —sold_by→ (seller)
-(review) —sent_from→ (IP)
-(review) —similar_to→ (review)
-✅ Model Architecture:
+---
 
-Built with PyTorch Geometric (PyG)
-HeteroConv with relation-specific aggregation
-2-layer GNN for multi-hop message passing
-Outputs TrustScore (fraud probability) for each review, IP, and seller
-✅ Real-Time Interface:
+## ✅ Installation Requirements
 
-Interactive frontend (Streamlit or Web App)
-Inputs: review text, rating, IP, seller, product
-Outputs: TrustScore with fraud likelihood and graph-based explanation
-—
+Run the following to install all required packages:
 
-🗂️ Project Structure
+```bash
+pip install torch torchvision torchaudio
+pip install torch-geometric
+pip install transformers
+pip install scikit-learn
+pip install nltk
+Also, download the VADER sentiment lexicon:
 
-.
-├── data/ # Input CSVs: reviews, products, sellers, IPs
-├── preprocess/ # Feature generation scripts (BERT, TF-IDF, etc.)
-├── model/ # HeteroGNN model and training code
-├── app/ # Inference + web interface (FastAPI / Streamlit)
-├── outputs/ # Saved models, trust scores
-└── README.md # This file
+python
+Copy
+Edit
+import nltk
+nltk.download('vader_lexicon')
+🚀 Running the Model in Google Colab or Locally
+Step 1: Clone the Repository
+bash
+Copy
+Edit
+git clone https://github.com/your-username/Amazon-Hackathon-Season-5.git
+cd Amazon-Hackathon-Season-5
+Replace your-username with your GitHub username.
 
-—
+Step 2: Prepare Model Weights
+Ensure multi_trust_gnn.pth is present in the root directory. If not, upload it manually in Colab:
 
-🚀 How It Works
+python
+Copy
+Edit
+from google.colab import files
+files.upload()  # Select multi_trust_gnn.pth
+Step 3: Run the Inference Pipeline
+Execute the testing script to:
 
-Data Ingestion:
-Loads review, product, seller, and IP datasets.
-Extracts node-level features.
-Graph Building:
-Builds a heterogeneous graph in PyTorch Geometric’s HeteroData format.
-Computes similarity edges based on review text (BERT + TF-IDF cosine similarity).
-Model Training:
-Trains a 2-layer HeteroGNN on labeled reviews, sellers, and IPs.
-Minimizes binary cross-entropy loss.
-Inference:
-Given new review + metadata, the model predicts TrustScores for review, IP, and seller.
-Optionally visualizes the neighborhood and influencing nodes.
-—
+Load the pretrained GNN model
 
-📦 Inputs
+Add multiple new review nodes
 
-Each node type has its own CSV:
+Fine-tune the model with known labels for the new reviews
 
-reviews.csv: review_id, text, rating, verified, timestamp, product_id, ip_id
-products.csv: product_id, description, price, return_rate, category
-sellers.csv: seller_id, avg_rating, flags, account_age
-ips.csv: ip_id, frequency, vpn_flag, hour_profile
-—
+Observe how the trust scores of connected IPs and Sellers change
 
-🧠 Sample Output
+Save updated trust scores to CSV files
 
-Input:
+bash
+Copy
+Edit
+python testing_file.py
+📤 Outputs
+After running testing_file.py, the following CSV files will be generated or updated:
 
-Review: "Great product!"
-Rating: 5
-Product: P1
-Seller: S1
-IP: IP1
-Output:
+trust_scores_all_reviews.csv – Trust scores for all reviews (existing + added)
 
-TrustScore (Review): 0.91 ⚠️
-TrustScore (IP): 0.95 🔴
-TrustScore (Seller): 0.82 🟠
-Explanation: IP used by 3 flagged reviews, seller linked to high return rate
-—
+trust_scores_all_ips.csv – Trust scores for all IP addresses
 
-📊 Evaluation Metrics
+trust_scores_all_sellers.csv – Trust scores for all sellers
 
-Precision, Recall, F1 Score
-ROC-AUC
-Explanation quality via neighborhood tracing
-—
-
-💡 Applications
-
-E-commerce trust & safety
-Counterfeit detection
-Review authenticity scoring
-Seller ranking and fraud ring detection
-—
-
-📁 Future Work
-
-Integrate GAT-based attention for explainability
-Visual TrustGraph explorer UI
-Active learning loop for IP/Seller labeling
-Real-time deployment on AWS (EKS + SageMaker)
+These files include updated scores after adding and fine-tuning on new review nodes.
